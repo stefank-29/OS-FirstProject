@@ -126,6 +126,8 @@ panic(char *s)
 #define CRTPORT 0x3d4
 static ushort *crt = (ushort*)P2V(0xb8000);  // CGA memory (pokazivac na short(niz))
 
+
+//**********************************
 static void
 cgaputc(int c) // ascii karakter (ispisuje char na ekran)
 {
@@ -190,6 +192,8 @@ struct {
 
 #define C(x)  ((x)-'@')  // Control-x
 
+#define A(x) ((x) + 'Z') // Alt-x
+
 void
 consoleintr(int (*getc)(void)) // upis u bafer (poziva se na klik dugmeta)
 {          // getc pokazivac na kbdgetc()
@@ -219,6 +223,11 @@ consoleintr(int (*getc)(void)) // upis u bafer (poziva se na klik dugmeta)
 		// case C('E'):
 		// 	ctrl_e_set = !ctrl_e_set;
 		// 	break;
+		case A('C'):
+		case A('L'):
+		case A('O'):
+			consputc('l');
+			break;
 		default:
 			if(c != 0 && input.e-input.r < INPUT_BUF){ // da l' ima mesta u baferu (< 128)
 				c = (c == '\r') ? '\n' : c; // \r u \n

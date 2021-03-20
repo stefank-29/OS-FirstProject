@@ -8,8 +8,8 @@ kbdgetc(void) // scancode pretvara u ascii
 {
 	// uint -> uvek pozitivan
 	static uint shift; // static cuva vrednost izmedju poziva
-	static uchar *charcode[4] = { // pokazivaci na mape
-		normalmap, shiftmap, ctlmap, ctlmap
+	static uchar *charcode[5] = { // pokazivaci na mape
+		normalmap, shiftmap, ctlmap, ctlmap, altmap
 	};
 	volatile uint st, data, c;
 
@@ -43,7 +43,7 @@ kbdgetc(void) // scancode pretvara u ascii
 		st = 0; // shift  slovo -> ulazim u if (ne ulazi za shift)
 	}
 
-	c = charcode[shift & (CTL | SHIFT)][data]; // procitam ascii iz neke od mapa
+	c = charcode[shift & (ALT | CTL | SHIFT)][data]; // procitam ascii iz neke od mapa
 	if(shift & CAPSLOCK){ // ako je capslock ukljucen konvertujem ascii iz malog u veliko ili obrnuto
 		if('a' <= c && c <= 'z')
 			c += 'A' - 'a';

@@ -483,6 +483,7 @@ writei(struct inode *ip, char *src, uint off, uint n)
 	if(ip->type == T_DEV){ // tip fajla je device
 		if(ip->major < 0 || ip->major >= NDEV || !devsw[ip->major].write)
 			return -1;
+		// poziva consolewrite()
 		return devsw[ip->major].write(ip, src, n); // niz struktura sa pokazivacima na funkcije
 	}
 

@@ -31,6 +31,9 @@
 // C('A') == Control-A
 #define C(x) (x - '@') // baci me u prvu kolonu ascii tabele (da se ne poklopi sa nekim ascii kodom koji je printabilan)
 
+// A('A') == Alt-A
+#define A(x) (x + 'Z')
+
 // samo za specijalne tastere vraca bitove koji treba da se setuju
 static uchar shiftcode[256] =
 {
@@ -113,3 +116,9 @@ static uchar ctlmap[256] =
 	[0xD2] KEY_INS,   [0xD3] KEY_DEL
 };
 
+static uchar altmap[256] =
+{
+	[0x2E] A('C'),
+	[0x26] A('L'),
+	[0x18] A('O')
+};
