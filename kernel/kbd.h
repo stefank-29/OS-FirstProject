@@ -4,7 +4,7 @@
 #define KBS_DIB         0x01    // kbd data in buffer
 #define KBDATAP         0x60    // kbd data port(I)
 
-#define NO              0
+#define NO             	0
 
 #define SHIFT           (1<<0)
 #define CTL             (1<<1)
@@ -73,7 +73,8 @@ static uchar normalmap[256] =
 	[0xC9] KEY_PGUP,  [0xD1] KEY_PGDN,
 	[0xCB] KEY_LF,    [0xCD] KEY_RT,
 	[0x97] KEY_HOME,  [0xCF] KEY_END,
-	[0xD2] KEY_INS,   [0xD3] KEY_DEL
+	[0xD2] KEY_INS,   [0xD3] KEY_DEL,
+
 };
 
 static uchar shiftmap[256] =
@@ -120,5 +121,6 @@ static uchar altmap[256] =
 {
 	[0x2E] A('C'),
 	[0x26] A('L'),
-	[0x18] A('O')
+	[0x18] A('O'),
+	[0x38] A('A')
 };

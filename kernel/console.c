@@ -182,6 +182,16 @@ consputc(int c)
 	cgaputc(c);
 }
 
+void
+openTable(){
+	// consputc('o');
+}
+
+void
+closeTable(){
+	// consputc('c');
+}
+
 #define INPUT_BUF 128
 struct {
 	char buf[INPUT_BUF];
@@ -196,12 +206,76 @@ struct {
 
 void
 consoleintr(int (*getc)(void)) // upis u bafer (poziva se na klik dugmeta)
-{          // getc pokazivac na kbdgetc()
+{
 	int c, doprocdump = 0;
-	// static int ctrl_e_set = 0;
+	static int alt_flags[3] = {0, 0, 0};
+	static int table_open = 0;
+
 
 	acquire(&cons.lock);
-	while((c = getc()) >= 0){
+	while((c = getc()) >= 0){ // getc pokazivac na kbdgetc()
+
+		// if(c == 0){
+		// 	consputc('*');
+		// 	continue;
+		// }
+		// if(c == -1){
+		// 	consputc('a');
+		// 	continue;
+		// }
+		if(c == A('A')){
+			// consputc('a');
+			continue;
+		}else if((c == A('C') || c == A('L') || c==A('O'))){
+			// consputc('a');
+			switch(c){
+				case A('C'):
+					alt_flags[0] = 1;
+					alt_flags[1] = 0;
+					alt_flags[2] = 0;
+					// consputc('a');
+					break;
+				case A('L'):
+					if(alt_flags[0]==1 && alt_flags[1]==0){
+						alt_flags[1] = 1;
+					}else{
+						alt_flags[0] = 0;
+						alt_flags[1] = 0;
+						alt_flags[2] = 0;
+					}
+					// consputc('a');
+					break;
+				case A('O'):
+					if(alt_flags[0]==1 && alt_flags[1]==1){
+						alt_flags[2] = 1;
+					}else{
+						alt_flags[0] = 0;
+						alt_flags[1] = 0;
+						alt_flags[2] = 0;
+					}
+					// consputc('a');
+					break;
+			}
+			if(alt_flags[0]==1 && alt_flags[1]==1 && alt_flags[2]==1){
+				// otvoriti tabelu ili zatvoriti
+				table_open = !table_open;
+				if(table_open){
+					openTable();
+				}else{
+					closeTable();
+				}
+			}
+			continue;
+		}
+
+
+		// resetovati flag
+		if(c != 0){
+			alt_flags[0] = 0;
+			alt_flags[1] = 0;
+			alt_flags[2] = 0;
+		}
+
 		switch(c){
 		case C('P'):  // Process listing. // ctrl + p
 			// procdump() locks cons.lock indirectly; invoke later
@@ -223,10 +297,11 @@ consoleintr(int (*getc)(void)) // upis u bafer (poziva se na klik dugmeta)
 		// case C('E'):
 		// 	ctrl_e_set = !ctrl_e_set;
 		// 	break;
+		//! mozda i ne treba ovde
 		case A('C'):
 		case A('L'):
 		case A('O'):
-			consputc('l');
+
 			break;
 		default:
 			if(c != 0 && input.e-input.r < INPUT_BUF){ // da l' ima mesta u baferu (< 128)

@@ -8,8 +8,8 @@ kbdgetc(void) // scancode pretvara u ascii
 {
 	// uint -> uvek pozitivan
 	static uint shift; // static cuva vrednost izmedju poziva
-	static uchar *charcode[5] = { // pokazivaci na mape
-		normalmap, shiftmap, ctlmap, ctlmap, altmap
+	static uchar *charcode[6] = { // pokazivaci na mape
+		normalmap, shiftmap, ctlmap, ctlmap, altmap, altmap
 	};
 	volatile uint st, data, c;
 
@@ -36,10 +36,9 @@ kbdgetc(void) // scancode pretvara u ascii
 	// shift + slovo zapravo dva poziva
 	// shift = | - | ESC | scrollLock | numLock | capsLock | alt | ctl | shift | -> da li su pomocni tasteri pritisnuti
 	shift |= shiftcode[data]; // setujem bitove na poziciji specijalnih tastera ako su pritisnuti (shift, alt, ctl)
-	shift ^= togglecode[data]; // za lock-ove\
-	// TODO: kad se klikne na alt setovati kao lock i slusati c, l, o
+	shift ^= togglecode[data]; // za lock-ove
 
-	if(shift & SHIFT && data != 0x2A && data != 0x36) {
+	if(shift & ALT && data != 0x38 ) {
 		st = 0; // shift  slovo -> ulazim u if (ne ulazi za shift)
 	}
 
@@ -50,6 +49,7 @@ kbdgetc(void) // scancode pretvara u ascii
 		else if('A' <= c && c <= 'Z')
 			c += 'a' - 'A';
 	}
+
 	return c;
 }
 
