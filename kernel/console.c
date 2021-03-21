@@ -182,7 +182,7 @@ consputc(int c)
 	cgaputc(c);
 }
 
-
+//******************************************
 static char table[10][23] = {
 	"/---<FG>--- ---<BG>---\\",
 	"|Black     |Black     |",
@@ -212,8 +212,10 @@ volatile static ushort hiddenConsole [10][23];
 
 static int tableX = 0, tableY = 0;
 
-// TODO blokiranje ostalih tastera kad je otovorena tabela
-// TODO kretanje kroz tabelu
+
+// TODO menjanje boje
+// TODO kad se ugasi tabela da bude trenutna boja iza
+// TODO kad se nastavi kucanje u toj boji da bude
 
 void
 openTable(){
@@ -240,8 +242,7 @@ openTable(){
 		y = 0;
 	}
 
-	x = 1;
-	for(int i = x*80+58, j = 0; i < x*80+68; i++){
+	for(int i = (tableX+1)*80+58 + tableY*11, j=0; i <  (tableX+1)*80+68 + tableY*11; i++){
 		crt[i] = (colors[tableX][tableY][j++] & 0xff) | 0xf000; // blackFG active
 	}
 }
@@ -259,6 +260,34 @@ closeTable(){
 		y = 0;
 	}
 
+}
+
+void
+renderTable(){
+	int x = 0, y = 0;
+
+	for(int i = 0; i < 10; i++){
+		for(int j = 57 + i*80; j < 80 + i*80; j++){
+			crt[j] = (table[x][y++] & 0xff) | 0x0f00; // belo na crno
+		}
+		x++;
+		y = 0;
+	}
+
+	for(int i = (tableX+1)*80+58 + tableY*11, j=0; i <  (tableX+1)*80+68 + tableY*11; i++){
+		crt[i] = (colors[tableX][tableY][j++] & 0xff) | 0xf000; // blackFG active
+	}
+}
+
+static ushort currColor = 0xc400;
+void renderConsole(){
+	for (int i = 0; i < 25; i++){
+		for(int j = 0+ i*80; j < 80 + i*80; j++){
+			if(!(i < 10 && j > i*80 + 56)){
+				crt[j] |= currColor; // | currColor
+			}
+		}
+	}
 }
 
 #define INPUT_BUF 128
@@ -284,17 +313,34 @@ consoleintr(int (*getc)(void)) // upis u bafer (poziva se na klik dugmeta)
 	acquire(&cons.lock);
 	while((c = getc()) >= 0){ // getc pokazivac na kbdgetc()
 
-		// if(c == 0){
-		// 	consputc('*');
-		// 	continue;
-		// }
-		// if(c == -1){
-		// 	consputc('a');
-		// 	continue;
-		// }
-		// if(table_open && c != 'w' && c != 's' && c!= 'a' && c!= 'd' && c!= 'e' && c!= 'r'){
-		// 	continue;
-		// }
+
+		if(table_open){
+			switch(c){
+				case 'w':
+					tableX = (tableX==0 ? 7 : tableX-1);
+					renderTable();
+					break;
+				case 's':
+					tableX = (tableX + 1) % 8;
+					renderTable();
+					break;
+				case 'a':
+				case 'd':
+					tableY = (tableY + 1) % 2;
+					renderTable();
+					break;
+				case 'e':
+					renderConsole();
+					break;
+				case 'r':
+					break;
+
+				default:
+					break;
+			}
+
+
+		}
 
 		if(c == A('A')){
 			// consputc('a');
