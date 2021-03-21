@@ -182,14 +182,39 @@ consputc(int c)
 	cgaputc(c);
 }
 
+
+char table[10][23] = {
+	"/---<FG>--- ---<BG>---\\",
+	"|Black     |Black     |",
+	"|Blue      |Blue      |",
+	"|Green     |Green     |",
+	"|Aqua      |Aqua      |",
+	"|Red       |Red       |",
+	"|Purple    |Purple    |",
+	"|Yellow    |Yellow    |",
+	"|White     |White     |",
+	"\\---------------------/",
+
+};
+
 void
 openTable(){
-	// consputc('o');
+	consputc('\n');
+	int pos = 57;
+	// for(int i = 0; i < 10; i++){
+	// 	for(int j = 0; j < 23; j++){
+	// 		consputc(table[i][j]);
+	// 	}
+	// 	consputc('\n');
+	// }
+	for(int i = 57; i < 79; i++){
+		crt[i] = ('a'&0xff) | 0x0700;
+	}
 }
 
 void
 closeTable(){
-	// consputc('c');
+	consputc('c');
 }
 
 #define INPUT_BUF 128
