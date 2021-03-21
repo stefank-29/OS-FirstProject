@@ -197,7 +197,23 @@ static char table[10][23] = {
 
 };
 
+volatile static char *colors[8][2] = {
+	{"Black     ", "Black     "},
+	{"Blue      ", "Blue      "},
+	{"Green     ", "Green     "},
+	{"Aqua      ", "Aqua      "},
+	{"Red       ", "Red       "},
+	{"Purple    ", "Purple    "},
+	{"Yellow    ", "Yellow    "},
+	{"White     ", "White     "},
+};
+
 volatile static ushort hiddenConsole [10][23];
+
+static int tableX = 0, tableY = 0;
+
+// TODO blokiranje ostalih tastera kad je otovorena tabela
+// TODO kretanje kroz tabelu
 
 void
 openTable(){
@@ -222,6 +238,11 @@ openTable(){
 		}
 		x++;
 		y = 0;
+	}
+
+	x = 1;
+	for(int i = x*80+58, j = 0; i < x*80+68; i++){
+		crt[i] = (colors[tableX][tableY][j++] & 0xff) | 0xf000; // blackFG active
 	}
 }
 
@@ -271,6 +292,10 @@ consoleintr(int (*getc)(void)) // upis u bafer (poziva se na klik dugmeta)
 		// 	consputc('a');
 		// 	continue;
 		// }
+		// if(table_open && c != 'w' && c != 's' && c!= 'a' && c!= 'd' && c!= 'e' && c!= 'r'){
+		// 	continue;
+		// }
+
 		if(c == A('A')){
 			// consputc('a');
 			continue;
@@ -355,7 +380,7 @@ consoleintr(int (*getc)(void)) // upis u bafer (poziva se na klik dugmeta)
 
 			break;
 		default:
-			if(c != 0 && input.e-input.r < INPUT_BUF){ // da l' ima mesta u baferu (< 128)
+			if(c != 0 && input.e-input.r < INPUT_BUF && !table_open){ // nije otvorena tabela
 				c = (c == '\r') ? '\n' : c; // \r u \n
 				input.buf[input.e++ % INPUT_BUF] = c;
 				// if(!ctrl_e_set)
