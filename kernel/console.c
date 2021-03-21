@@ -183,7 +183,7 @@ consputc(int c)
 }
 
 
-char table[10][23] = {
+static char table[10][23] = {
 	"/---<FG>--- ---<BG>---\\",
 	"|Black     |Black     |",
 	"|Blue      |Blue      |",
@@ -197,24 +197,47 @@ char table[10][23] = {
 
 };
 
+volatile static ushort hiddenConsole [10][23];
+
 void
 openTable(){
-	consputc('\n');
 	int pos = 57;
-	// for(int i = 0; i < 10; i++){
-	// 	for(int j = 0; j < 23; j++){
-	// 		consputc(table[i][j]);
-	// 	}
-	// 	consputc('\n');
-	// }
-	for(int i = 57; i < 79; i++){
-		crt[i] = ('a'&0xff) | 0x0700;
+
+	int x = 0, y = 0;
+
+	for(int i = 0; i < 10; i++){
+		for(int j = 57 + i*80; j < 80 + i*80; j++){
+			hiddenConsole[x][y++] = crt[j];
+		}
+		x++;
+		y = 0;
+	}
+
+	x = 0;
+	y = 0;
+
+	for(int i = 0; i < 10; i++){
+		for(int j = 57 + i*80; j < 80 + i*80; j++){
+			crt[j] = (table[x][y++] & 0xff) | 0x0f00; // belo na crno
+		}
+		x++;
+		y = 0;
 	}
 }
 
 void
 closeTable(){
-	consputc('c');
+	// iz hiddenConsole ispisati u crt
+	int x = 0, y = 0;
+
+	for(int i = 0; i < 10; i++){
+		for(int j = 57 + i*80; j < 80 + i*80; j++){
+			crt[j] = hiddenConsole[x][y++]; // da se oruje sa trenutnom bojom
+		}
+		x++;
+		y = 0;
+	}
+
 }
 
 #define INPUT_BUF 128
@@ -251,7 +274,7 @@ consoleintr(int (*getc)(void)) // upis u bafer (poziva se na klik dugmeta)
 		if(c == A('A')){
 			// consputc('a');
 			continue;
-		}else if((c == A('C') || c == A('L') || c==A('O'))){
+		}else if((c == A('C') || c == A('O') || c==A('L'))){
 			// consputc('a');
 			switch(c){
 				case A('C'):
@@ -260,7 +283,7 @@ consoleintr(int (*getc)(void)) // upis u bafer (poziva se na klik dugmeta)
 					alt_flags[2] = 0;
 					// consputc('a');
 					break;
-				case A('L'):
+				case A('O'):
 					if(alt_flags[0]==1 && alt_flags[1]==0){
 						alt_flags[1] = 1;
 					}else{
@@ -270,7 +293,7 @@ consoleintr(int (*getc)(void)) // upis u bafer (poziva se na klik dugmeta)
 					}
 					// consputc('a');
 					break;
-				case A('O'):
+				case A('L'):
 					if(alt_flags[0]==1 && alt_flags[1]==1){
 						alt_flags[2] = 1;
 					}else{
@@ -282,6 +305,10 @@ consoleintr(int (*getc)(void)) // upis u bafer (poziva se na klik dugmeta)
 					break;
 			}
 			if(alt_flags[0]==1 && alt_flags[1]==1 && alt_flags[2]==1){
+				// reset flag-ova
+				alt_flags[0] = 0;
+				alt_flags[1] = 0;
+				alt_flags[2] = 0;
 				// otvoriti tabelu ili zatvoriti
 				table_open = !table_open;
 				if(table_open){
@@ -292,7 +319,6 @@ consoleintr(int (*getc)(void)) // upis u bafer (poziva se na klik dugmeta)
 			}
 			continue;
 		}
-
 
 		// resetovati flag
 		if(c != 0){
