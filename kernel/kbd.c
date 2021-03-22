@@ -8,8 +8,8 @@ kbdgetc(void) // scancode pretvara u ascii
 {
 	// uint -> uvek pozitivan
 	static uint shift; // static cuva vrednost izmedju poziva
-	static uchar *charcode[6] = { // pokazivaci na mape
-		normalmap, shiftmap, ctlmap, ctlmap, altmap, altmap
+	static uchar *charcode[7] = { // pokazivaci na mape
+		normalmap, shiftmap, ctlmap, ctlmap, altmap, altmap, altmap
 	};
 	volatile uint st, data, c;
 

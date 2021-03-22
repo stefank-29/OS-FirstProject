@@ -200,7 +200,9 @@ cgaputc(int c) // ascii karakter (ispisuje char na ekran)
 	if((pos/80) >= 24){  // Scroll up.  // pos/80 -> index trenutnog reda
 		memmove(crt, crt+80, sizeof(crt[0])*23*80); // (to, from, moveBytes) // pomera od 2 do 24 reda na gore
  		pos -= 80; // vrati kursor gore
-		memset(crt+pos, 0x25, sizeof(crt[0])*(24*80 - pos)); // (adresa, value, numBytes) // od kursora do kraja reda popuni nulama
+		//memset(crt+pos, currColor, sizeof(crt[0])*(24*80 - pos)); // (adresa, value, numBytes) // od kursora do kraja reda popuni nulama
+		memmove(crt+pos, crt+pos+80,  sizeof(crt[0])*80);
+
 	}
 	// upisem poziciju kursora u crt kontoler
 	outb(CRTPORT, 14);
@@ -225,9 +227,6 @@ consputc(int c)
 		uartputc(c);
 	cgaputc(c);
 }
-
-
-// TODO kad se nastavi kucanje u toj boji da bude
 
 void
 openTable(){
