@@ -208,13 +208,25 @@ volatile static char *colors[8][2] = {
 	{"White     ", "White     "},
 };
 
+volatile static ushort colorsHex[8][2] = {
+	{0x0000, 0x0000},
+	{0x0100, 0x1000},
+	{0x0200, 0x2000},
+	{0x0300, 0x3000},
+	{0x0400, 0x4000},
+	{0x0500, 0x5000},
+	{0x0600, 0x6000},
+	{0x0700, 0x7000},
+
+};
 
 volatile static ushort hiddenConsole [10][23];
 
 static int tableX = 0, tableY = 0;
 
+static ushort currColor = 0x0700;
 
-// TODO kad se ugasi tabela da bude trenutna boja iza
+
 // TODO kad se nastavi kucanje u toj boji da bude
 
 void
@@ -251,10 +263,11 @@ void
 closeTable(){
 	// iz hiddenConsole ispisati u crt
 	int x = 0, y = 0;
-
+	static uint mask = 0xff00;
 	for(int i = 0; i < 10; i++){
 		for(int j = 57 + i*80; j < 80 + i*80; j++){
-			crt[j] = hiddenConsole[x][y++]; // da se oruje sa trenutnom bojom
+			crt[j] = hiddenConsole[x][y++];
+			crt[j] =  (crt[j] & ~mask) | (currColor & mask); // set currColor
 		}
 		x++;
 		y = 0;
@@ -279,19 +292,7 @@ renderTable(){
 	}
 }
 
-static ushort currColor = 0x0700;
 
-volatile static ushort colorsHex[8][2] = {
-	{0x0000, 0x0000},
-	{0x0100, 0x1000},
-	{0x0200, 0x2000},
-	{0x0300, 0x3000},
-	{0x0400, 0x4000},
-	{0x0500, 0x5000},
-	{0x0600, 0x6000},
-	{0x0700, 0x7000},
-
-};
 
 void
 setCurrColor(int brighter){
