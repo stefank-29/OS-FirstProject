@@ -19,6 +19,50 @@ static void consputc(int);
 
 static int panicked = 0;
 
+//******************************************
+static char table[10][23] = {
+	"/---<FG>--- ---<BG>---\\",
+	"|Black     |Black     |",
+	"|Blue      |Blue      |",
+	"|Green     |Green     |",
+	"|Aqua      |Aqua      |",
+	"|Red       |Red       |",
+	"|Purple    |Purple    |",
+	"|Yellow    |Yellow    |",
+	"|White     |White     |",
+	"\\---------------------/",
+
+};
+
+volatile static char *colors[8][2] = {
+	{"Black     ", "Black     "},
+	{"Blue      ", "Blue      "},
+	{"Green     ", "Green     "},
+	{"Aqua      ", "Aqua      "},
+	{"Red       ", "Red       "},
+	{"Purple    ", "Purple    "},
+	{"Yellow    ", "Yellow    "},
+	{"White     ", "White     "},
+};
+
+volatile static ushort colorsHex[8][2] = {
+	{0x0000, 0x0000},
+	{0x0100, 0x1000},
+	{0x0200, 0x2000},
+	{0x0300, 0x3000},
+	{0x0400, 0x4000},
+	{0x0500, 0x5000},
+	{0x0600, 0x6000},
+	{0x0700, 0x7000},
+
+};
+
+volatile static ushort hiddenConsole [10][23];
+
+static int tableX = 0, tableY = 0;
+
+static ushort currColor = 0x0700;
+
 static struct {
 	struct spinlock lock;
 	int locking;
@@ -144,7 +188,7 @@ cgaputc(int c) // ascii karakter (ispisuje char na ekran)
 	else if(c == BACKSPACE){
 		if(pos > 0) --pos;
 	} else
-		crt[pos++] = (c&0xff) | 0x0700;  // white on black
+		crt[pos++] = (c&0xff) | currColor;  // white on black
 
 	// if(c == '#'){
 	// 	  crt[pos++] = (c&0xff) | 0xC400;
@@ -156,14 +200,14 @@ cgaputc(int c) // ascii karakter (ispisuje char na ekran)
 	if((pos/80) >= 24){  // Scroll up.  // pos/80 -> index trenutnog reda
 		memmove(crt, crt+80, sizeof(crt[0])*23*80); // (to, from, moveBytes) // pomera od 2 do 24 reda na gore
  		pos -= 80; // vrati kursor gore
-		memset(crt+pos, 0, sizeof(crt[0])*(24*80 - pos)); // (adresa, value, numBytes) // od kursora do kraja reda popuni nulama
+		memset(crt+pos, 0x25, sizeof(crt[0])*(24*80 - pos)); // (adresa, value, numBytes) // od kursora do kraja reda popuni nulama
 	}
 	// upisem poziciju kursora u crt kontoler
 	outb(CRTPORT, 14);
 	outb(CRTPORT+1, pos>>8); // saljem visi bajt
 	outb(CRTPORT, 15);
 	outb(CRTPORT+1, pos); // nizi bajt
-	crt[pos] = ' ' | 0x0700;
+	crt[pos] = ' ' | currColor;
 }
 
 void
@@ -181,50 +225,6 @@ consputc(int c)
 		uartputc(c);
 	cgaputc(c);
 }
-
-//******************************************
-static char table[10][23] = {
-	"/---<FG>--- ---<BG>---\\",
-	"|Black     |Black     |",
-	"|Blue      |Blue      |",
-	"|Green     |Green     |",
-	"|Aqua      |Aqua      |",
-	"|Red       |Red       |",
-	"|Purple    |Purple    |",
-	"|Yellow    |Yellow    |",
-	"|White     |White     |",
-	"\\---------------------/",
-
-};
-
-volatile static char *colors[8][2] = {
-	{"Black     ", "Black     "},
-	{"Blue      ", "Blue      "},
-	{"Green     ", "Green     "},
-	{"Aqua      ", "Aqua      "},
-	{"Red       ", "Red       "},
-	{"Purple    ", "Purple    "},
-	{"Yellow    ", "Yellow    "},
-	{"White     ", "White     "},
-};
-
-volatile static ushort colorsHex[8][2] = {
-	{0x0000, 0x0000},
-	{0x0100, 0x1000},
-	{0x0200, 0x2000},
-	{0x0300, 0x3000},
-	{0x0400, 0x4000},
-	{0x0500, 0x5000},
-	{0x0600, 0x6000},
-	{0x0700, 0x7000},
-
-};
-
-volatile static ushort hiddenConsole [10][23];
-
-static int tableX = 0, tableY = 0;
-
-static ushort currColor = 0x0700;
 
 
 // TODO kad se nastavi kucanje u toj boji da bude
