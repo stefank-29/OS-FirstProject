@@ -214,7 +214,6 @@ volatile static ushort hiddenConsole [10][23];
 static int tableX = 0, tableY = 0;
 
 
-// TODO menjanje boje
 // TODO kad se ugasi tabela da bude trenutna boja iza
 // TODO kad se nastavi kucanje u toj boji da bude
 
@@ -299,10 +298,10 @@ setCurrColor(int brighter){
 	static uint mask;
 	if (tableY == 0){ // slova
 		mask = 0x0f00;
-		currColor = (currColor & ~mask) | (colorsHex[tableX][tableY] & mask);
-	} else if (tableY == 1) {// pozadina
+		currColor = (currColor & ~mask) | ((brighter ? colorsHex[tableX][tableY] | 0x0800 : colorsHex[tableX][tableY]) & mask);
+	} else if (tableY == 1) { // pozadina
 		mask = 0xf000;
-		currColor = (currColor & ~mask) | (colorsHex[tableX][tableY] & mask);
+		currColor = (currColor & ~mask) | ((brighter ? colorsHex[tableX][tableY] | 0x8000 : colorsHex[tableX][tableY]) & mask);
 	}
 }
 
@@ -313,7 +312,7 @@ renderConsole(int brighter){
 	for (int i = 0; i < 25; i++){
 		for(int j = 0+ i*80; j < 80 + i*80; j++){
 			if(!(i < 10 && j > i*80 + 56)){
-				crt[j] =  (crt[j] & ~mask) | (currColor & mask); // | currColor
+				crt[j] =  (crt[j] & ~mask) | (currColor & mask); // set currColor
 			}
 		}
 	}
